@@ -1,4 +1,4 @@
-This repository hosts materials for the ENEZA training 2025 edition.
+This repository hosts materials for the ENEZA training 2026 edition.
 
 # Eneza Data Science Residential training 2026 - Mini Projects
 Mini-projects for the residential training. As part of the Eneza Residential training 2026, you will collaboratively work on mini-projects in groups of at between 4 and 6.
