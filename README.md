@@ -1,7 +1,7 @@
 This repository hosts materials for the ENEZA training 2026 edition.
 
 # Eneza Data Science Residential training 2026 - Mini Projects
-Mini-projects for the residential training. As part of the Eneza Residential training 2026, you will collaboratively work on mini-projects in groups of at between 4 and 6.
+Mini-projects for the residential training. As part of the Eneza Residential training 2026, you will collaboratively work on mini-projects in groups of 4 - 6.
 
 ## Projects
 
@@ -15,9 +15,10 @@ Mini-projects for the residential training. As part of the Eneza Residential tra
 | 6   | [Cancer subtype from gene expression](Project_6.md)       | Transcriptomics/ML       
 | 7   | [Maternal & child health outcomes](Project_7.md)          | Data science/ML   
 | 8   | [Gut microbiome signatures of disease](Project_8.md)      | Metagenomics      
-| 9   | [Resolving cryptic coral diversity in Kenyan reefs using low-coverage whole-genome sequencing](Project_9.md) | Genomics |
-| 10  | [Leveraging biomedical literature to predict resistance of bacterial strains to common classes of antibiotics in Kenya](Project_10.md)   | NLP |
+| 9   | [Resolving cryptic coral diversity in Kenyan reefs using low-coverage whole-genome sequencing](Project_9.md) | Genomics 
+| 10  | [Leveraging biomedical literature to predict resistance of bacterial strains to common classes of antibiotics in Kenya](Project_10.md)   | NLP 
 
+To select a project, please comment on the issue and why you'd like to tackle the mini-project. Select at least two, and specify your First, Second and Third choice. Kindly also remember to include your institution (where you come from).
 
 # Expectations
 Work collaboratively on the project. In your report, you need to state the role played by each group member.
