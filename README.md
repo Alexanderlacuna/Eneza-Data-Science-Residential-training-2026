@@ -13,7 +13,7 @@ Mini-projects for the residential training. As part of the Eneza Residential tra
 | 4   | [HIV drug resistance from sequences](Project_4.md)        | Bioinformatics/ML 
 | 5   | [Clinical text mining (NLP)](Project_5.md)                | NLP               
 | 6   | [Cancer subtype from gene expression](Project_6.md)       | Transcriptomics/ML       
-| 7   | [Maternal & child health outcomes](Project_7.md)          | Data science/ML   
+| 7   | [Child health outcomes](Project_7.md)          | Data science   
 | 8   | [Gut microbiome signatures of disease](Project_8.md)      | Metagenomics      
 | 9   | [Biomedical literature mining](Project_10.md)             | NLP 
 
