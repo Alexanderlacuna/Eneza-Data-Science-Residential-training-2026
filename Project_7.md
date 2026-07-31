@@ -4,20 +4,17 @@ Maternal and child health is a national priority in Kenya, and the difference be
 
 ## Your task
 
-1. Predict a mother's risk level from routine clinical measurements (age, blood pressure, blood sugar, heart rate).
-2. Describe how Kenyan maternal/child indicators (stunting, skilled birth attendance, immunisation) vary by region and wealth quintile.
-3. Audit the risk model for fairness across age groups and check calibration.
-4. Discuss where to target interventions.
+1. Describe how Kenyan maternal/child indicators (stunting, skilled birth attendance, immunisation) vary by region and wealth quintile.
+2. Discuss where to target interventions.
 
 ## Datasets
 
-- **UCI Maternal Health Risk** — <https://archive.ics.uci.edu/dataset/863/maternal+health+risk>. **Subset:** full set (small); individual-level ML core.
 - **DHS API (STATcompiler)** — <https://api.dhsprogram.com>. **Subset:** Kenya indicators by region/wealth.
 - **UNICEF / WHO GHO** — <https://data.unicef.org>. **Subset:** supporting indicators.
 
 ## Deliverables
 
-Reproducible notebook, disaggregated EDA, a predictive model with a subgroup equity + calibration audit, report with ethics/Data Protection notes + roles.
+Reproducible notebook, disaggregated EDA, report with ethics/Data Protection notes + roles.
 
 ## Stretch goals
 
