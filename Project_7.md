@@ -1,4 +1,4 @@
-# Predicting maternal & child health outcomes
+# Child health outcomes
 
 Maternal and child health is a national priority in Kenya, and the difference between a safe and a dangerous pregnancy often comes down to factors that can be measured and acted on early (a mother's blood pressure and blood sugar, and her access to skilled care). Data science can help both by flagging who is most at risk and by revealing where health services are falling short for particular communities. In this project you will work with open health data at two levels: an individual-level clinical dataset to build a maternal-risk classifier from routine measurements, and open Kenyan survey indicators to study how outcomes such as child stunting, skilled birth attendance, and immunisation coverage vary across regions and wealth groups. A central theme is doing this *responsibly*, by checking that the model is fair across groups and well-calibrated, and not merely accurate.
 
