@@ -1,0 +1,10 @@
+# Eneza — reproducible dependency lock
+# Direct dependencies only; transitive packages are resolved by pip at build time.
+# To create a fully frozen transitive lock, see REPRODUCIBILITY.md.
+
+numpy==1.26.4
+pandas==2.2.2
+scikit-learn==1.5.2
+matplotlib==3.9.2
+seaborn==0.13.2
+lifelines==0.29.0

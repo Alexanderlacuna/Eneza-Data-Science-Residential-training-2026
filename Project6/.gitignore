@@ -1,0 +1,29 @@
+# Eneza — version-control exclusions
+
+# Python cache and virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+venv/
+.env/
+.env
+
+# Editor / IDE artefacts
+.vscode/
+.idea/
+*.swp
+*~
+.#*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# If you use git, uncomment the lines below to exclude large raw data and
+# regenerated outputs from version control.
+# data/
+# output/
+# output2/
+# outputs/

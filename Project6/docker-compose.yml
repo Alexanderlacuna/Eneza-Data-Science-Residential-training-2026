@@ -1,0 +1,24 @@
+# Eneza — Docker Compose service
+#
+# Usage:
+#   docker compose up --build          # build image and run pipeline
+#   docker compose run --rm eneza bash   # interactive shell
+#
+# The project directory is mounted into /app so the container can read the
+# local data files and write outputs back to the host.
+
+services:
+  eneza:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: eneza:latest
+    container_name: eneza-pipeline
+    volumes:
+      - .:/app
+    environment:
+      # Force matplotlib non-interactive backend even if the container is
+      # launched from an interactive shell.
+      - MPLBACKEND=Agg
+    # Default command runs the pipeline. Override with `bash` for exploration.
+    command: python scripts/run.py

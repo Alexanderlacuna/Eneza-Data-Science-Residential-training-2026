@@ -1,0 +1,36 @@
+# Build-context exclusions for Eneza
+# Keep the Docker build small and avoid baking data/outputs into any layer.
+
+# Raw and generated data (mounted at runtime)
+data/
+
+# Generated outputs (should never be in the image)
+output/
+output2/
+outputs/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Version control
+.git/
+.gitignore
+
+# Documentation and reports (not needed for runtime image)
+*.org
+*.md
+*.html
+*.pdf
+*.tex
+*.png
+*.jpg
+
+# Editor/IDE files
+.vscode/
+.idea/
+*.swp
+*~
+.#*
