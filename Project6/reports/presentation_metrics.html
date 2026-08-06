@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eneza Progress Report — Feature Selection, Classifier & Survival</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/theme/white.css">
+  <style>
+    :root {
+      --r-background-color: #ffffff;
+      --r-main-font: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      --r-heading-font: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      --r-main-font-size: 28px;
+      --r-heading-color: #1a1a1a;
+      --r-link-color: #2980b9;
+    }
+    .reveal .slides section {
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 0.5em;
+    }
+    .reveal h1 { font-size: 1.45em; color: #2c3e50; margin-bottom: 0.3em; }
+    .reveal h2 { font-size: 1.15em; color: #2c3e50; margin-bottom: 0.3em; }
+    .reveal h3 { font-size: 0.95em; color: #34495e; margin-bottom: 0.2em; }
+    .reveal p, .reveal li { font-size: 0.75em; line-height: 1.3; }
+    .reveal small { font-size: 0.6em; }
+    .reveal img {
+      max-height: 42vh;
+      max-width: 85%;
+      width: auto;
+      height: auto;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      display: block;
+      margin: 0.4em auto;
+    }
+    .reveal table {
+      font-size: 0.55em;
+      margin: 0.4em auto;
+      border-collapse: collapse;
+    }
+    .reveal table th, .reveal table td {
+      border: 1px solid #bbb;
+      padding: 4px 8px;
+      text-align: center;
+    }
+    .reveal table th {
+      background: #ecf0f1;
+      font-weight: bold;
+    }
+    .reveal blockquote {
+      background: #f8f9fa;
+      border-left: 4px solid #2980b9;
+      padding: 0.6em 1.2em;
+      font-size: 0.7em;
+      width: 85%;
+    }
+    .reveal .columns {
+      display: flex;
+      justify-content: space-between;
+      gap: 1em;
+      text-align: left;
+    }
+    .reveal .columns > div {
+      flex: 1;
+      min-width: 0;
+    }
+    .caption {
+      font-size: 0.5em;
+      color: #555;
+      margin-top: 0.2em;
+      text-align: center;
+    }
+    .progress-bar { color: #27ae60; }
+    .done { color: #27ae60; font-weight: bold; }
+    .inprogress { color: #f39c12; font-weight: bold; }
+    .next { color: #3498db; font-weight: bold; }
+    .callout {
+      background: #fdebd0;
+      border-left: 5px solid #f39c12;
+      padding: 0.5em 0.8em;
+      margin: 0.6em 0;
+      font-size: 0.7em;
+      text-align: left;
+    }
+    .reveal pre, .reveal code {
+      font-size: 0.75em;
+      background: #f4f4f4;
+      padding: 0.1em 0.3em;
+      border-radius: 3px;
+    }
+    /* Ensure slide content doesn't blow up reveal scaling */
+    .reveal .slides {
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- Slide 1: Title -->
+      <section>
+        <h1>Eneza Progress Report</h1>
+        <h3>Feature Selection → Classifier → Validation → Survival</h3>
+        <p><em>test7.py iteration: baseline done, validation next</em></p>
+        <p><small>TCGA THCA RNA-seq v2 RSEM + clinical annotations</small></p>
+        <img src="outputs/figures/progress_roadmap.png" alt="Roadmap">
+        <p class="caption">Project roadmap: baseline established, validation & minority-class work next</p>
+      </section>
+
+      <!-- Slide 2: Problem -->
+      <section>
+        <h2>The problem we are solving</h2>
+        <div class="columns">
+          <div>
+            <h3>Clinical need</h3>
+            <ul>
+              <li>Tall-cell variant of PTC is more aggressive.</li>
+              <li>It is also the rarest class (&lt; 10%).</li>
+              <li>A molecular classifier could triage ambiguous biopsies.</li>
+            </ul>
+          </div>
+          <div>
+            <h3>ML challenge</h3>
+            <ul>
+              <li>Imbalanced 3-class problem</li>
+              <li>~20,000 genes → feature selection needed</li>
+              <li>Overall accuracy is misleading</li>
+              <li><strong>This iteration</strong> establishes metrics &amp; a reproducible baseline.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="callout">
+          <strong>Progress framing:</strong> next iteration will focus on Tall-cell detection and external validation.
+        </div>
+      </section>
+
+      <!-- Slide 3: Validation -->
+      <section>
+        <h2>Validation workflow — how we keep it honest</h2>
+        <img src="outputs/figures/validation_workflow.png" alt="Validation workflow">
+        <p class="caption">Train/test split + 5-fold CV. Feature selection is inside each CV fold to avoid leakage.</p>
+        <ul>
+          <li>80/20 stratified train/test split</li>
+          <li>5-fold stratified CV on the training set</li>
+          <li><code>SelectKBest</code> fit only on training folds</li>
+          <li>Final 20% test set used once, after model selection</li>
+        </ul>
+      </section>
+
+      <!-- Slide 4: Metrics -->
+      <section>
+        <h2>Metrics that matter for imbalanced cancer data</h2>
+        <img src="outputs/figures/metrics_choice.png" alt="Metrics choice">
+        <p class="caption">Class imbalance makes overall accuracy misleading. We use macro F1 and balanced accuracy.</p>
+        <table>
+          <tr><th>Metric</th><th>Why it matters</th><th>Priority</th></tr>
+          <tr><td>Macro F1</td><td>Balances precision &amp; recall per class</td><td>1st</td></tr>
+          <tr><td>Balanced accuracy</td><td>Equal weight to each class; protects Tall cell</td><td>2nd</td></tr>
+          <tr><td>ROC-AUC OvR</td><td>Ranking ability; sanity check</td><td>3rd</td></tr>
+          <tr><td>PR-AUC OvR</td><td>Better for rare-class ranking</td><td>4th</td></tr>
+        </table>
+      </section>
+
+      <!-- Slide 5: Feature selection methods -->
+      <section>
+        <h2>Feature selection — what we tested</h2>
+        <p><small>All pipelines use the same final classifier (Logistic Regression) so differences are due to the selector alone.</small></p>
+        <table>
+          <tr><th>Selector</th><th>Mechanism</th><th>Genes</th></tr>
+          <tr><td>ANOVA F k-best</td><td>Univariate F-test, top k</td><td>100</td></tr>
+          <tr><td>Mutual information</td><td>Non-linear gene–class dependence</td><td>100</td></tr>
+          <tr><td>FDR-corrected ANOVA</td><td>Benjamini–Hochberg α = 0.05</td><td>~3,540</td></tr>
+          <tr><td>DESeq/edgeR pre-ranked</td><td>Pairwise DE FDR, min across comparisons</td><td>100</td></tr>
+        </table>
+        <div class="callout">
+          <span class="done">Progress note:</span> ANOVA k-best is the winner — simplest and most interpretable.
+        </div>
+      </section>
+
+      <!-- Slide 6: Feature selection results -->
+      <section>
+        <h2>Feature selection — results</h2>
+        <img src="outputs/figures/feature_selector_comparison.png" alt="Feature selector comparison">
+        <p class="caption">Feature selector comparison (5-fold CV). ANOVA k-best wins on macro F1 and balanced accuracy.</p>
+        <table>
+          <tr><th>Selector</th><th>Macro F1</th><th>Balanced acc</th><th>ROC-AUC</th><th>Genes</th></tr>
+          <tr><td><strong>ANOVA k-best</strong></td><td><strong>0.551</strong></td><td><strong>0.607</strong></td><td>0.747</td><td>100</td></tr>
+          <tr><td>Mutual information</td><td>0.538</td><td>0.604</td><td>0.719</td><td>100</td></tr>
+          <tr><td>FDR ANOVA</td><td>0.569</td><td>0.576</td><td><strong>0.798</strong></td><td>~3,540</td></tr>
+          <tr><td>DESeq/edgeR</td><td>0.538</td><td>0.569</td><td>0.728</td><td>100</td></tr>
+        </table>
+      </section>
+
+      <!-- Slide 7: ANOVA vs DESeq -->
+      <section>
+        <h2>ANOVA vs DESeq/edgeR</h2>
+        <img src="outputs/figures/deseq_vs_anova.png" alt="ANOVA vs DESeq">
+        <p class="caption">Head-to-head with identical k=100 and classifier. ANOVA wins on every metric.</p>
+        <table>
+          <tr><th>Method</th><th>Macro F1</th><th>Balanced acc</th><th>ROC-AUC</th></tr>
+          <tr><td><strong>ANOVA k-best</strong></td><td><strong>0.551</strong></td><td><strong>0.607</strong></td><td><strong>0.747</strong></td></tr>
+          <tr><td>DESeq/edgeR</td><td>0.538</td><td>0.569</td><td>0.728</td></tr>
+        </table>
+        <p><small><strong>Why:</strong> ANOVA directly optimizes 3-class separation; DESeq rewards genes significant in any pairwise comparison, which is not the same as being informative for the joint task.</small></p>
+      </section>
+
+      <!-- Slide 8: Top genes -->
+      <section>
+        <h2>Top predictive genes</h2>
+        <img src="outputs/figures/top_genes.png" alt="Top genes">
+        <p class="caption">Top 20 predictive genes from the final ANOVA k-best + Logistic Regression model.</p>
+        <ul>
+          <li><strong>TBC1D2</strong>, <strong>CYP1B1</strong>, <strong>TM7SF4</strong> carry the largest absolute coefficients.</li>
+          <li><strong>MET</strong> (HGF receptor, invasion/metastasis) appears in the top-100 list.</li>
+          <li>Most genes still need pathway / literature validation in an independent cohort.</li>
+        </ul>
+      </section>
+
+      <!-- Slide 9: Classifier comparison -->
+      <section>
+        <h2>Classifier comparison</h2>
+        <img src="outputs/figures/classifier_comparison.png" alt="Classifier comparison">
+        <p class="caption">All classifiers use the same ANOVA k-best selection. Logistic Regression wins on macro F1 and balanced accuracy.</p>
+        <table>
+          <tr><th>Classifier</th><th>Macro F1</th><th>Balanced acc</th><th>ROC-AUC</th></tr>
+          <tr><td><strong>Logistic Regression</strong></td><td><strong>0.551</strong></td><td><strong>0.607</strong></td><td>0.747</td></tr>
+          <tr><td>Random Forest</td><td>0.492</td><td>0.496</td><td><strong>0.823</strong></td></tr>
+        </table>
+        <p><small>Random Forest ranks better but makes worse decisions for the minority class. LinearSVC was excluded because it lacks probability estimates.</small></p>
+      </section>
+
+      <!-- Slide 10: Confusion matrix -->
+      <section>
+        <h2>Final model — confusion matrix</h2>
+        <p><small>Model: SelectKBest ANOVA F k=100 → StandardScaler → Logistic Regression (class_weight=balanced)</small></p>
+        <img src="outputs/figures/confusion_matrix.png" alt="Confusion matrix">
+        <p class="caption">Held-out 20% test set. Tall cell (n=7) is the bottleneck.</p>
+      </section>
+
+      <!-- Slide 11: Tall cell bottleneck -->
+      <section>
+        <h2>The Tall-cell bottleneck — our main pain point</h2>
+        <img src="outputs/figures/tall_cell_problem.png" alt="Tall cell bottleneck">
+        <p class="caption">The aggressive minority class has very few samples and very low recall.</p>
+        <table>
+          <tr><th>Class</th><th>Precision</th><th>Recall</th><th>F1</th><th>Test n</th></tr>
+          <tr><td>Classical</td><td>0.85</td><td>0.73</td><td>0.79</td><td>71</td></tr>
+          <tr><td>Follicular</td><td>0.50</td><td>0.71</td><td>0.59</td><td>21</td></tr>
+          <tr><td>Tall cell</td><td>0.13</td><td>0.14</td><td>0.13</td><td>7</td></tr>
+        </table>
+        <div class="callout">
+          <span class="next">Next:</span> more Tall-cell data, cost-sensitive learning, and a dedicated binary Tall-cell detector.
+        </div>
+      </section>
+
+      <!-- Slide 12: Final performance -->
+      <section>
+        <h2>Final model — quantitative performance</h2>
+        <div class="columns">
+          <div>
+            <h3>Cross-validation (5-fold)</h3>
+            <table>
+              <tr><th>Metric</th><th>Mean</th><th>Range</th></tr>
+              <tr><td>Balanced acc</td><td>0.607</td><td>0.534–0.694</td></tr>
+              <tr><td>Macro F1</td><td>0.551</td><td>0.509–0.612</td></tr>
+              <tr><td>ROC-AUC OvR</td><td>0.747</td><td>0.648–0.791</td></tr>
+            </table>
+          </div>
+          <div>
+            <h3>Held-out test (20%)</h3>
+            <table>
+              <tr><th>Metric</th><th>Score</th></tr>
+              <tr><td>Balanced acc</td><td>0.530</td></tr>
+              <tr><td>Macro F1</td><td>0.503</td></tr>
+              <tr><td>ROC-AUC OvR</td><td>0.752</td></tr>
+              <tr><td>PR-AUC OvR</td><td>0.732</td></tr>
+            </table>
+          </div>
+        </div>
+        <p><small>Ranking metrics are stable; classification metrics are noisy because the Tall-cell test set is tiny (n=7).</small></p>
+      </section>
+
+      <!-- Slide 13: Kaplan-Meier concept -->
+      <section>
+        <h2>Survival analysis — Kaplan-Meier concept</h2>
+        <img src="outputs/figures/km_concept.png" alt="KM concept">
+        <p class="caption">KM is a step-function estimate of survival probability. A step down is an event; | is a censored patient.</p>
+        <ul>
+          <li>S(t) = P(alive at time t)</li>
+          <li>Censored patients contribute up to last follow-up, then leave the risk set.</li>
+          <li>Log-rank test compares observed vs expected deaths across groups.</li>
+        </ul>
+      </section>
+
+      <!-- Slide 14: Annotated KM -->
+      <section>
+        <h2>Survival — annotated subtype</h2>
+        <img src="outputs/figures/km_annotated_subtype.png" alt="Annotated KM">
+        <p class="caption">Kaplan-Meier overall survival by pathologist-assigned subtype. TCGA PTC is mostly indolent.</p>
+        <ul>
+          <li>Very few death events.</li>
+          <li>Tall-cell curve (n=35) hints at worse survival but is not significant.</li>
+          <li>No pairwise comparison reaches p &lt; 0.05.</li>
+        </ul>
+      </section>
+
+      <!-- Slide 15: Predicted KM -->
+      <section>
+        <h2>Survival — predicted subtype</h2>
+        <img src="outputs/figures/km_predicted_subtype.png" alt="Predicted KM">
+        <p class="caption">Kaplan-Meier overall survival by model-predicted subtype. No survival signal emerges.</p>
+        <ul>
+          <li>Model predicts more Tall-cell cases (n=57) than annotation (n=35).</li>
+          <li>Even with the enlarged group, curves do not separate.</li>
+          <li><strong>Implication:</strong> OS is too weak an endpoint; use recurrence / DFS or molecular markers.</li>
+        </ul>
+      </section>
+
+      <!-- Slide 16: Log-rank table -->
+      <section>
+        <h2>Survival — log-rank p-values</h2>
+        <table>
+          <tr><th>Comparison</th><th>Annotated p</th><th>Predicted p</th><th>Significant?</th></tr>
+          <tr><td>Classical vs Follicular</td><td>0.193</td><td>0.119</td><td>No</td></tr>
+          <tr><td>Classical vs Tall cell</td><td>0.282</td><td>0.987</td><td>No</td></tr>
+          <tr><td>Follicular vs Tall cell</td><td>0.550</td><td>0.158</td><td>No</td></tr>
+        </table>
+        <div class="callout">
+          <strong>Takeaway:</strong> survival data do not validate the subtypes in this cohort, mainly because PTC is indolent and death events are rare.
+        </div>
+      </section>
+
+      <!-- Slide 17: Summary & next steps -->
+      <section>
+        <h2>Summary &amp; next steps</h2>
+        <div class="columns">
+          <div>
+            <h3><span class="done">Done</span></h3>
+            <ul>
+              <li>ANOVA k-best + Logistic Regression baseline</li>
+              <li>Right metrics chosen</li>
+              <li>Leakage-free validation pipeline</li>
+            </ul>
+          </div>
+          <div>
+            <h3><span class="inprogress">In progress</span></h3>
+            <ul>
+              <li>Survival linkage (KM + log-rank complete; interpretation ongoing)</li>
+            </ul>
+          </div>
+          <div>
+            <h3><span class="next">Next</span></h3>
+            <ul>
+              <li>Tall-cell enrichment</li>
+              <li>Clinical covariates</li>
+              <li>External validation</li>
+              <li>DFS/recurrence endpoints</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 18: Backup PCA -->
+      <section>
+        <h2>Backup — PCA exploratory view</h2>
+        <img src="outputs/figures/pca_subtype.png" alt="PCA">
+        <p class="caption">PCA on top 5,000 variable genes. Classical and Follicular overlap; Tall-cell is scattered.</p>
+        <p><small>PC1 = 19.4%, PC2 = 9.1%, PC3 = 7.0%. Partial separation suggests a larger Tall-cell cohort or additional features may be needed.</small></p>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/reveal.js"></script>
+  <script>
+    Reveal.initialize({
+      hash: true,
+      slideNumber: 'c/t',
+      transition: 'slide',
+      width: 1280,
+      height: 720,
+      margin: 0.05,
+      center: true,
+      controls: true,
+      progress: true,
+      history: true,
+      keyboard: true,
+      overview: true,
+      touch: true
+    });
+  </script>
+</body>
+</html>
