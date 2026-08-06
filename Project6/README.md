@@ -36,6 +36,10 @@ docker compose up --build
 
 Outputs are written to `output/`.
 
+####  check reproducibility docs:
+
+`./REPRODUCIBILITY.md`
+
 ### Local Python
 
 ```bash
@@ -133,13 +137,10 @@ To change the model or feature count, edit the `Config` object in
 
 - Single-cohort analysis (TCGA THCA only); external validation is needed.
 - Small tall-cell class (36 samples) limits learning for that subtype.
-- Global top-5,000 variance filter is unsupervised; move it inside CV for a
-  production pipeline.
-- Survival analysis is under-powered because PTC has very few death events.
+
 
 ## Citation and data provenance
 
-- TCGA data: The Cancer Genome Atlas (TCGA) Thyroid Carcinoma (THCA) cohort,
-  accessed via cBioPortal and TCGA clinical sample sheets.
+- TCGA data: The Cancer Genome Atlas (TCGA) Thyroid Carcinoma (THCA) cohort.
 - Design decisions: `docs/architecture_design.org`.
 
