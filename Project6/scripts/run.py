@@ -7,9 +7,9 @@ classification from tumour gene expression.
 
 Data source (local)
 -------------------
-- TCGA THCA RNA-seq v2 RSEM: ``data/data_mrna_seq_v2_rsem.txt``
-- TCGA THCA sample phenotype: ``data/data_clinical_sample.txt``
-- TCGA THCA patient survival: ``data/data_clinical_patient.txt``
+- TCGA THCA RNA-seq v2 RSEM: ``data/data_mrna_seq_v2_rsem.txt.gz``
+- TCGA THCA sample phenotype: ``data/data_clinical_sample.txt.gz``
+- TCGA THCA patient survival: ``data/data_clinical_patient.txt.gz``
 
 Clinical task
 -------------
@@ -95,9 +95,9 @@ class Config:
     """
 
     # Files
-    expression_path: str = "./data/data_mrna_seq_v2_rsem.txt"
-    clinical_sample_path: str = "./data/data_clinical_sample.txt"
-    patient_path: str = "./data/data_clinical_patient.txt"
+    expression_path: str = "./data/data_mrna_seq_v2_rsem.txt.gz"
+    clinical_sample_path: str = "./data/data_clinical_sample.txt.gz"
+    patient_path: str = "./data/data_clinical_patient.txt.gz"
 
     # Phenotype
     sample_id_column: str = "SAMPLE_ID"
@@ -1113,7 +1113,7 @@ def load_deseq_results(deseq_dir: str) -> Dict[str, pd.DataFrame]:
     if not p.is_dir():
         raise FileNotFoundError(
             f"DESeq results directory not found: {p.resolve()}")
-    files = sorted(p.glob("*.csv"))
+    files = sorted(p.glob("*.csv.gz"))
     if not files:
         raise FileNotFoundError(f"No CSV files found in {p.resolve()}")
 

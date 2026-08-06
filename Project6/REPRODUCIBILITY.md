@@ -40,9 +40,13 @@ an identical environment across different machines.
 - [Docker Engine](https://docs.docker.com/engine/install/) 24.0+ (or Docker Desktop)
 - [Docker Compose](https://docs.docker.com/compose/install/) v2+
 - The raw TCGA data files in `data/`:
-  - `data/data_mrna_seq_v2_rsem.txt`
-  - `data/data_clinical_sample.txt`
-  - `data/data_clinical_patient.txt`
+  - `data/data_mrna_seq_v2_rsem.txt.gz`
+  - `data/data_clinical_sample.txt.gz`
+  - `data/data_clinical_patient.txt.gz`
+
+All files are gzip-compressed. The `scripts/run.py` pipeline reads them
+transparently via `pandas.read_csv`. See `data_manifest.json` for the
+SHA-256 checksums of the original uncompressed files.
 
 You can fetch the TCGA THCA Pan-Cancer Atlas files from the
 [cBioPortal datahub](https://github.com/cBioPortal/datahub/tree/master/public/thca_tcga_pan_can_atlas_2018).
@@ -181,9 +185,9 @@ scores, so every output directory is self-documenting.
 The TCGA data files must be present in `data/` before the container or Guix
 environment starts. Check that the following files exist:
 
-- `data/data_mrna_seq_v2_rsem.txt`
-- `data/data_clinical_sample.txt`
-- `data/data_clinical_patient.txt`
+- `data/data_mrna_seq_v2_rsem.txt.gz`
+- `data/data_clinical_sample.txt.gz`
+- `data/data_clinical_patient.txt.gz`
 
 You can download them from the [cBioPortal datahub](https://github.com/cBioPortal/datahub/tree/master/public/thca_tcga_pan_can_atlas_2018).
 

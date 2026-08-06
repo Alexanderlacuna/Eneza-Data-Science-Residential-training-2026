@@ -1,8 +1,8 @@
 {
   "config": {
-    "expression_path": "./data/data_mrna_seq_v2_rsem.txt",
-    "clinical_sample_path": "./data/data_clinical_sample.txt",
-    "patient_path": "./data/data_clinical_patient.txt",
+    "expression_path": "./data/data_mrna_seq_v2_rsem.txt.gz",
+    "clinical_sample_path": "./data/data_clinical_sample.txt.gz",
+    "patient_path": "./data/data_clinical_patient.txt.gz",
     "sample_id_column": "SAMPLE_ID",
     "label_column": "TUMOR_TYPE",
     "min_class_size": 20,
@@ -25,27 +25,27 @@
     "verbosity": 20
   },
   "cv_scores": {
-    "fit_time": 0.11637296676635742,
-    "score_time": 0.04984250068664551,
+    "fit_time": 0.1513040542602539,
+    "score_time": 0.054793596267700195,
     "balanced_accuracy": 0.6072196422428621,
     "f1_macro": 0.5504774007910564,
     "precision_macro": 0.5343602435916532,
     "recall_macro": 0.6072196422428621,
-    "roc_auc_ovr_weighted": 0.7464418619230899,
+    "roc_auc_ovr_weighted": 0.7463602208655404,
     "fold_scores": {
       "fit_time": [
-        0.12282633781433105,
-        0.1198873519897461,
-        0.10788774490356445,
-        0.10874319076538086,
-        0.12252020835876465
+        0.14930129051208496,
+        0.16033554077148438,
+        0.14163851737976074,
+        0.14488530158996582,
+        0.16035962104797363
       ],
       "score_time": [
-        0.047876596450805664,
-        0.05147433280944824,
-        0.050237417221069336,
-        0.049896240234375,
-        0.0497279167175293
+        0.05422663688659668,
+        0.0549468994140625,
+        0.054512739181518555,
+        0.05530428886413574,
+        0.0549774169921875
       ],
       "balanced_accuracy": [
         0.533625730994152,
@@ -76,10 +76,10 @@
         0.6944444444444445
       ],
       "roc_auc_ovr_weighted": [
-        0.7908927767606457,
-        0.7609985723501443,
-        0.7737758019463721,
-        0.6470823829694797,
+        0.7912946252637599,
+        0.7612027373154363,
+        0.7725548007253707,
+        0.6472891654343267,
         0.759459775588808
       ]
     }
@@ -89,8 +89,8 @@
     "f1_macro": 0.503149138443256,
     "precision_macro": 0.4924863387978142,
     "recall_macro": 0.5298457411133467,
-    "roc_auc_ovr_weighted": 0.7524424046163177,
-    "pr_auc_ovr_weighted": 0.7321842810515965
+    "roc_auc_ovr_weighted": 0.7532934054673187,
+    "pr_auc_ovr_weighted": 0.7330101386956359
   },
   "n_top_genes": 100
 }

@@ -40,9 +40,9 @@ diagnostic device.
 
 #+begin_example
 Raw TCGA data
-  data/data_mrna_seq_v2_rsem.txt      (genes × samples, RSEM)
-  data/data_clinical_sample.txt       (sample-level labels, TUMOR_TYPE)
-  data/data_clinical_patient.txt      (patient-level survival)
+  data/data_mrna_seq_v2_rsem.txt.gz   (genes × samples, RSEM)
+  data/data_clinical_sample.txt.gz    (sample-level labels, TUMOR_TYPE)
+  data/data_clinical_patient.txt.gz   (patient-level survival)
             │
             ▼
 ┌─────────────────────────────────────┐

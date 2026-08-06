@@ -1,7 +1,7 @@
 comparison,type,logrank_p,significant_0.05
-"Thyroid Papillary Carcinoma, Classical/Usual Type vs Thyroid Papillary Carcinoma, Follicular (>= 99% Follicular Patterned)",annotated_subtype,0.19336094384585276,False
-"Thyroid Papillary Carcinoma, Classical/Usual Type vs Thyroid Papillary Carcinoma, Tall Cell (>= 50% Tall Cell Features)",annotated_subtype,0.28205096387822937,False
+"Thyroid Papillary Carcinoma, Classical/Usual Type vs Thyroid Papillary Carcinoma, Follicular (>= 99% Follicular Patterned)",annotated_subtype,0.1933609438458526,False
+"Thyroid Papillary Carcinoma, Classical/Usual Type vs Thyroid Papillary Carcinoma, Tall Cell (>= 50% Tall Cell Features)",annotated_subtype,0.2820509638782298,False
 "Thyroid Papillary Carcinoma, Follicular (>= 99% Follicular Patterned) vs Thyroid Papillary Carcinoma, Tall Cell (>= 50% Tall Cell Features)",annotated_subtype,0.5500973172303969,False
 "Thyroid Papillary Carcinoma, Classical/Usual Type vs Thyroid Papillary Carcinoma, Follicular (>= 99% Follicular Patterned)",predicted_subtype,0.1186382990296613,False
 "Thyroid Papillary Carcinoma, Classical/Usual Type vs Thyroid Papillary Carcinoma, Tall Cell (>= 50% Tall Cell Features)",predicted_subtype,0.9867251074974874,False
-"Thyroid Papillary Carcinoma, Follicular (>= 99% Follicular Patterned) vs Thyroid Papillary Carcinoma, Tall Cell (>= 50% Tall Cell Features)",predicted_subtype,0.15791592398113874,False
+"Thyroid Papillary Carcinoma, Follicular (>= 99% Follicular Patterned) vs Thyroid Papillary Carcinoma, Tall Cell (>= 50% Tall Cell Features)",predicted_subtype,0.15791592398113868,False

@@ -88,9 +88,14 @@ If you use version control, add `data/` and `output/` to `.gitignore`.
 
 ## Data
 
-- `data/data_mrna_seq_v2_rsem.txt` — RSEM expression matrix (20,531 genes × 500 samples)
-- `data/data_clinical_sample.txt` — sample labels (`TUMOR_TYPE`)
-- `data/data_clinical_patient.txt` — patient survival data
+- `data/data_mrna_seq_v2_rsem.txt.gz` — RSEM expression matrix (20,531 genes × 500 samples)
+- `data/data_clinical_sample.txt.gz` — sample labels (`TUMOR_TYPE`)
+- `data/data_clinical_patient.txt.gz` — patient survival data
+
+All raw TCGA files are gzip-compressed in place to reduce storage and transfer
+size. They are read transparently by `pandas.read_csv`. A `data_manifest.json`
+file at the project root records the SHA-256 hashes of the uncompressed files
+for provenance checking.
 
 After filtering, 491 samples remain: 355 classical, 102 follicular variant, 36
 tall-cell variant.

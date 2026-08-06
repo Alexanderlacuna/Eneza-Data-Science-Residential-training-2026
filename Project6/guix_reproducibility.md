@@ -17,6 +17,10 @@ source-level provenance, or when you are working on an HPC cluster.
 
 ## Quick start
 
+The data files in `data/` are gzip-compressed (`.gz`) to save space.
+`scripts/run.py` reads them transparently through `pandas.read_csv`, so no
+manual decompression is required.
+
 1. Make sure Guix is installed and the project data files are in `data/`.
 2. Create a Guix manifest that includes Python and the required packages. A
    minimal starting point:
