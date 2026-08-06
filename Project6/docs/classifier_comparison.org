@@ -1,0 +1,151 @@
+#+TITLE: Classifier comparison for thyroid carcinoma subtype classification
+#+AUTHOR: Eneza team
+#+DATE: 2026-08-03
+
+* Purpose
+
+We compare two classifiers for the PTC subtype prediction task:
+
+1. *Multinomial logistic regression* (the current default classifier)
+2. *Random forest*
+
+Both use the same feature-selection method (ANOVA k-best, k=100) and the same
+validation scheme so that differences are due to the classifier alone.
+
+* Why these two classifiers?
+
+- **Logistic regression** is a linear, interpretable model. It is fast, stable,
+  and produces coefficients that can be interpreted as gene-direction effects.
+- **Random forest** is a non-linear ensemble model. It can capture interactions
+  between genes and often ranks samples well via class probabilities.
+
+LinearSVC was excluded because it lacks `predict_proba`, which is needed for
+ROC-AUC and PR-AUC comparison on the same footing.
+
+* Experimental design (fair comparison)
+
+| Component | Setting |
+|-----------|---------|
+| Feature selector | `SelectKBest(f_classif, k=100)` |
+| Scaler | `StandardScaler` |
+| CV | 5-fold stratified, `random_state=42` |
+| Metrics | Balanced accuracy, macro F1, macro precision/recall, ROC-AUC OvR weighted |
+| Class weight | `balanced` for both |
+
+* Results
+
+** 5-fold CV performance
+
+| Classifier | Balanced accuracy | Macro F1 | Macro precision | Macro recall | ROC-AUC OvR weighted |
+|------------|------------------:|---------:|----------------:|-------------:|---------------------:|
+| Logistic regression | **0.607** | **0.550** | **0.534** | **0.607** | 0.747 |
+| Random forest | 0.496 | 0.492 | 0.509 | 0.496 | **0.823** |
+
+The figure `../output/figures/classifier_comparison.png` shows the same comparison
+graphically.
+
+** Interpretation
+
+- **Logistic regression** is better at *hard classification*: it has higher
+  balanced accuracy, F1, and recall. This means it correctly assigns more
+  samples to their true subtype, including the rare tall-cell class.
+
+- **Random forest** is better at *ranking samples*: it has a higher ROC-AUC.
+  This means its predicted probabilities are useful for ordering samples by
+  likelihood of belonging to each subtype, but its actual class assignments are
+  worse because it tends to be less sensitive to the minority class.
+
+* Why logistic regression wins on hard classification
+
+1. **Class imbalance.** The tall-cell class has only 36 samples. Random forests
+   are not naturally calibrated for minority classes; even with
+   `class_weight="balanced"`, tree-based models can under-sample rare classes
+   because each tree sees a bootstrap subset.
+
+2. **Linear separability.** The problem appears to be roughly linearly separable
+   in the 100-gene ANOVA feature space. Logistic regression finds the optimal
+   linear boundary directly. Random forests may overfit small idiosyncrasies in
+   the high-dimensional feature space.
+
+3. **Interpretability.** For a clinical triage tool, the logistic coefficients
+   tell us which genes push a sample toward each subtype. Random forests are
+   harder to interpret even with feature importance.
+
+4. **Calibration.** Logistic regression tends to produce well-calibrated
+   probabilities, which is important for a decision-support tool where clinicians
+   see confidence scores.
+
+* Why random forest is still interesting
+
+The higher ROC-AUC of random forest suggests that if we used it as a
+**screening / ranking tool** rather than a hard classifier, it could be useful:
+
+- It could flag a list of top candidate samples for each subtype.
+- It could be combined with logistic regression in an ensemble.
+- It could be worth tuning further (more trees, deeper trees, different feature
+  sets) to see if the hard classification improves.
+
+* Caveats
+
+1. **Only two classifiers tested.** Gradient boosting, SVM with RBF, or a simple
+   neural network might behave differently.
+
+2. **Only k=100 tested.** Different feature-set sizes might favour different
+   classifiers. Random forests often improve with more features.
+
+3. **No hyperparameter tuning.** Both classifiers were run with sensible
+   defaults, not grid search. A tuned random forest might close the gap.
+
+4. **Small sample size.** With only 491 samples and 36 tall-cell cases, the
+   comparison is noisy. The apparent winner may not generalise to a larger
+   cohort.
+
+* Recommendation
+
+We recommend keeping **logistic regression** as the default classifier for the
+hackathon submission because:
+
+- It gives the best hard-classification performance (F1, balanced accuracy).
+- It is more interpretable via per-gene coefficients.
+- It is well-calibrated and fast.
+- The primary clinical use case is *triage*, where a confident subtype
+  prediction is more useful than a good ranking.
+
+We note that random forest has superior ROC-AUC, so it could be explored as a
+secondary ranking model or in an ensemble if time permits.
+
+* Reproduction
+
+Run the full pipeline:
+
+#+begin_src bash
+python scripts/run.py
+#+end_src
+
+The classifier comparison is performed automatically by `compare_models()` in
+`scripts/run.py`.
+
+To run only the comparison from Python:
+
+#+begin_src python
+from scripts.run import Config, compare_models
+from pathlib import Path
+
+cfg = Config(classifier="logistic", selector="kbest", selected_features=100)
+compare_models(cfg, X_train, y_train, Path("./outputs"))
+#+end_src
+
+* Files produced
+
+| File | Description |
+|------|-------------|
+| `../output/tables/classifier_comparison.csv` | Numerical CV metrics for both classifiers |
+| `../output/figures/classifier_comparison.png` | Bar-plot comparison of key metrics |
+
+* Conclusion
+
+Logistic regression outperforms random forest on the clinically relevant hard
+classification metrics for this PTC subtype task. Random forest shows stronger
+ranking ability (ROC-AUC) but weaker hard assignments. We therefore keep
+logistic regression as the final classifier while acknowledging that random
+forest remains an interesting alternative for ranking or ensemble approaches.

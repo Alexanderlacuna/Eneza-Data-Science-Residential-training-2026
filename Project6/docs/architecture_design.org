@@ -1,0 +1,247 @@
+#+TITLE: Eneza — Architecture & Design Decisions
+#+AUTHOR: Team Eneza
+#+DATE: 2026-08-06
+
+* Purpose of this document
+
+This document explains the architecture of the Eneza thyroid-cancer subtype
+classifier, the trade-offs we considered, and why we made each technical
+decision.  It is meant for anyone who wants to understand, extend, or
+re-deploy the project.
+
+* High-level goal
+
+Build a reproducible, end-to-end Python pipeline that learns to classify
+thyroid papillary carcinoma (PTC) histologic subtypes from tumour RNA-seq
+gene-expression profiles, with honest validation and clear biological
+interpretation.
+
+The project is framed as a **molecular triage prototype**, not a clinical
+diagnostic device.
+
+* Design principles
+
+1. **Reproducibility first.**  Every random operation is seeded, all
+   parameters are stored in an immutable `Config`, and the full configuration is
+   serialised into the results report.
+2. **No information leakage.**  Supervised feature selection happens inside
+   cross-validation.  Train/test splits are stratified.
+3. **Honest reporting.**  We report CV *and* held-out test metrics, per-class
+   precision/recall, and statistical tests that are under-powered when
+   appropriate.
+4. **Interpretability over black-box performance.**  A linear model with ranked
+   gene coefficients is easier to explain to clinicians and biologists than a
+   deep-learning ensemble.
+5. **Single-file readability for a hackathon.**  The whole pipeline lives in
+   `scripts/run.py`.  This makes it easy to follow end-to-end, at the cost of not
+   being a fully modular Python package.
+
+* System overview
+
+#+begin_example
+Raw TCGA data
+  data/data_mrna_seq_v2_rsem.txt      (genes × samples, RSEM)
+  data/data_clinical_sample.txt       (sample-level labels, TUMOR_TYPE)
+  data/data_clinical_patient.txt      (patient-level survival)
+            │
+            ▼
+┌─────────────────────────────────────┐
+│  Load & clean (I/O module)          │  drop NA genes, deduplicate symbols
+│  log2(x+1) transform                │  variance stabilisation
+│  Top-5 000 variable genes filter    │  unsupervised, for speed + EDA
+└─────────────────────────────────────┘
+            │
+            ▼
+┌─────────────────────────────────────┐
+│  Align samples ↔ labels             │  strip TCGA sample suffix if needed
+│  Train/test split (stratified 80/20)│  preserves class ratios
+└─────────────────────────────────────┘
+            │
+            ▼
+┌─────────────────────────────────────┐
+│  sklearn Pipeline per CV fold       │  SelectKBest(ANOVA) → StandardScaler →
+│  Feature selection inside CV        │  LogisticRegression(class_weight="balanced")
+│  Cross-validation (stratified 5-fold)│
+└─────────────────────────────────────┘
+            │
+            ▼
+┌─────────────────────────────────────┐
+│  Hold-out evaluation                │  confusion matrix, ROC/PR-AUC
+│  Top gene extraction & annotation   │  coefficients + literature notes
+│  Stretch goals: selector & model    │  ANOVA, FDR, mutual info, DESeq, RF
+│  Stretch goal: survival analysis    │  Kaplan-Meier + log-rank
+└─────────────────────────────────────┘
+            │
+            ▼
+        output/
+          figures/   tables/   gene_lists/
+#+end_example
+
+* Module-by-module rationale
+
+** Configuration (`Config` dataclass)
+
+- All file paths, preprocessing flags, model choices, and seeds live in one
+  frozen dataclass.
+- `asdict(config)` is written to JSON, so every output directory is
+  self-documenting.
+- Why a dataclass?  It gives us type hints, immutability (`frozen=True`), and
+  easy serialisation without building a custom settings framework.
+
+** I/O helpers (`load_expression_matrix`, `load_clinical_sample`, `load_labels`)
+
+- Expression and clinical loaders are separated so failures are localised and
+  easy to debug.
+- TCGA clinical files have four comment header rows; we skip them explicitly.
+- `load_labels` drops rare classes (`Other`, n < 20) so the classifier has enough
+  examples to learn from.
+
+** Pre-processing (`clean_expression_matrix`, `log2_transform`, `select_top_variable_genes`)
+
+| Step | What it does | Why we chose it |
+|------|--------------|-----------------|
+| Clean | Set `Hugo_Symbol` index, drop duplicates/NA, remove `Entrez_Gene_Id`, force numeric | TCGA matrices mix IDs and metadata; gene symbols are the biologically meaningful keys |
+| log2(x+1) | Element-wise log transform | RSEM values are right-skewed counts; log stabilises variance and makes linear-model coefficients interpretable |
+| Top-5 000 variance filter | Keep highest-variance genes globally | Reduces dimensionality from 20 531 → 5 000 for speed; applied *before* labels are used, so leakage is minimal (and documented) |
+
+** Alignment (`align_expression_and_labels`)
+
+- TCGA sample IDs in the expression matrix include a sample suffix (e.g.
+  `-01A`), while clinical IDs are often patient IDs.
+- The helper tries an exact match first, then falls back to stripping the
+  suffix.  This avoids brittle manual ID mapping.
+
+** Exploratory analysis (`plot_pca`)
+
+- PCA on the top 5 000 variable genes, coloured by subtype, gives a sanity
+  check before modelling.
+- We centre and scale before PCA so highly expressed genes do not dominate.
+- It also becomes a figure we can show in the report/pitch.
+
+** Model pipeline (`build_pipeline`)
+
+The final pipeline is deliberately simple:
+
+#+begin_example
+SelectKBest(f_classif, k=100) → StandardScaler → LogisticRegression(...)
+#+end_example
+
+| Choice | Reason |
+|--------|--------|
+| `SelectKBest` with ANOVA F-test | Fast, univariate, and transparent. It ranks genes by linear association with subtype. |
+| `StandardScaler` | Logistic regression and SVM are distance-based; scaling prevents high-variance genes from dominating. |
+| `LogisticRegression` (multinomial) | Probabilistic, multiclass-native, fast, and the coefficients are directly interpretable as gene importance. |
+| `class_weight="balanced"` | Corrects for the tall-cell class being only ~7% of samples. |
+| `solver="lbfgs"` | Stable default for multinomial logistic regression on moderate-size data. |
+| `max_iter=5000` | Guarantees convergence on the scaled, 100-feature design matrix. |
+
+** Cross-validation (`evaluate_cv`)
+
+- `StratifiedKFold` keeps class proportions in every fold, which is critical
+  for the small tall-cell class.
+- We use multiple metrics: balanced accuracy, macro F1, macro precision,
+  macro recall, and ROC-AUC OvR weighted.
+- The pipeline is passed to `cross_validate`, so feature selection is refit
+  inside each fold.
+
+** Hold-out evaluation (`evaluate_holdout`)
+
+- A single 80/20 stratified split gives an honest estimate of performance on
+  unseen samples.
+- We save the confusion matrix and a JSON/CSV classification report.
+- ROC-AUC and PR-AUC are computed one-vs-rest because this is a multiclass
+  problem.
+
+** Model interpretation (`extract_top_genes`, `annotate_genes`)
+
+- For linear models we rank genes by mean absolute multinomial coefficient.
+- For tree-based models we fall back to `feature_importances_`.
+- `annotate_genes` adds lightweight, manually-curated notes for known
+  thyroid-cancer genes (BRAF, TERT, TP53, etc.).  This is a hackathon-level
+  annotation; a production system would query MyGene.info or MSigDB.
+
+** Stretch goal — feature-selector comparison (`compare_feature_selectors`)
+
+We compare four selection strategies while keeping the final classifier
+fixed (multinomial logistic regression) and CV identical:
+
+| Selector | Rationale |
+|----------|-----------|
+| ANOVA k-best | Default; parsimonious, hard-label performance |
+| ANOVA FDR (`SelectFdr`) | Automatic significance threshold; often selects more genes |
+| Mutual information | Captures non-linear associations without LASSO convergence issues |
+| DESeq/edgeR pre-ranked | Imports externally computed differential-expression statistics; tests whether DE ranking improves classification |
+
+Isolating one component at a time lets us attribute performance differences
+fairly to the feature-selection method.
+
+** Stretch goal — classifier comparison (`compare_models`)
+
+- Logistic regression vs. random forest under identical ANOVA k-best
+  selection.
+- Only classifiers with `predict_proba` are compared for ROC-AUC fairness;
+  `LinearSVC` is supported elsewhere but excluded here.
+- Logistic regression wins on hard classification; random forest wins on
+  ranking.  This supports our default choice for a triage tool.
+
+** Stretch goal — survival analysis (`run_survival_analysis`)
+
+- Work in Progress 
+
+* Anti-leakage safeguards
+
+1. **Train/test split before any supervised step.**  Labels are only used for
+   the split after the unsupervised variance filter.
+2. **Feature selection inside CV.**  `SelectKBest` is fit only on each
+   training fold.
+3. **Stratification everywhere.**  Train/test split and CV folds preserve the
+   class distribution.
+4. **Class balancing.**  Prevents the model from ignoring the small tall-cell
+   class.
+5. **DESeq results are precomputed externally.**  If those results were
+   computed on the same data, this is documented as mild leakage and kept as a
+   comparison rather than the default pipeline.
+
+* Technology stack
+
+| Layer | Technology | Why |
+|-------|------------|-----|
+| Language | Python 3.11 | Mature ML ecosystem, readable, hackathon-friendly |
+| ML framework | scikit-learn 1.5+ | Pipelines, cross-validation, metrics, and linear models all in one well-tested library |
+| Data | pandas + numpy | TCGA matrices are tabular and moderately sized |
+| Plotting | matplotlib + seaborn | Publication-quality figures, familiar syntax |
+| Survival | lifelines | Pure-Python Kaplan-Meier/log-rank, easy integration with pandas |
+| Containerisation | Docker + docker-compose | Guarantees identical OS, Python, and dependency versions across laptops and servers |
+
+
+* Deployment & reproducibility
+
+See `REPRODUCIBILITY.md` for the Docker-based deployment guide.  At the
+architecture level the reproducibility hinges on:
+
+1. Pinning the Python base image (`python:3.11-slim`).
+2. Pinning every direct dependency (`requirements.lock`).
+3. Seeding every random operation (`random_state=42`).
+4. Serialising the full `Config` into the output JSON report.
+5. Mounting the data directory into the container at runtime, so the same
+   image produces identical outputs from identical inputs.
+
+* Known limitations
+
+
+- Tall-cell variant has only 36 samples, limiting model performance.
+
+* Decision log
+
+| Decision | Alternative | Why we chose this |
+|----------|-------------|-------------------|
+| Single script (`scripts/run.py`) | Modular `src/` package | Hackathon speed and readability |
+| Immutable `Config` dataclass | Mutable global dict or YAML | Type safety, serialisation, no accidental mutation |
+| Logistic regression default | Random forest / SVM / XGBoost | Interpretability, probabilistic output, fast training |
+| ANOVA k-best default | FDR / mutual info / DESeq | Best hard-classification performance in the benchmark |
+| Feature selection inside CV | Global selection before split | Prevents target leakage |
+| Class weight balanced | SMOTE / class weights / ignore | Simple, built into scikit-learn, avoids synthetic data |
+| log2(x+1) transform | VST / TPM / raw RSEM | Fast, reversible, and standard for RSEM |
+| Top-5 000 variance pre-filter | Use all 20 531 genes | Makes PCA and CV fast enough for a laptop |
+| Docker deployment | Conda / virtualenv only | Guarantees OS-level reproducibility |
+
