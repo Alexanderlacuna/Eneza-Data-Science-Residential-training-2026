@@ -7,6 +7,21 @@ classical/usual, follicular variant, and tall-cell variant.
 This is a research prototype for molecular triage, not a clinical diagnostic
 device.
 
+
+## TLDR 
+
+docker compose up --build
+
+What happens:
+
+1. Docker builds an image with Python 3.11 and the pinned dependencies.
+2. The current project directory is mounted into `/app` inside the container.
+3. The container runs `python scripts/run.py`.
+4. All outputs are written back to the host in `./output/`.
+
+
+
+
 ## Quick start
 
 ### Docker (recommended for full reproducibility)
