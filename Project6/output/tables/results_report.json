@@ -1,0 +1,96 @@
+{
+  "config": {
+    "expression_path": "./data/data_mrna_seq_v2_rsem.txt",
+    "clinical_sample_path": "./data/data_clinical_sample.txt",
+    "patient_path": "./data/data_clinical_patient.txt",
+    "sample_id_column": "SAMPLE_ID",
+    "label_column": "TUMOR_TYPE",
+    "min_class_size": 20,
+    "top_variable_genes": 5000,
+    "log_transform": true,
+    "selector": "kbest",
+    "selected_features": 100,
+    "alpha_threshold": 0.05,
+    "classifier": "logistic",
+    "cv_splits": 5,
+    "test_size": 0.2,
+    "random_state": 42,
+    "class_weight": "balanced",
+    "max_iter": 5000,
+    "deseq_results_dir": "./data/deseq_data",
+    "deseq_k": 100,
+    "deseq_score_col": "FDR",
+    "deseq_rank_method": "min",
+    "output_dir": "./output",
+    "verbosity": 20
+  },
+  "cv_scores": {
+    "fit_time": 0.18122258186340331,
+    "score_time": 0.05855240821838379,
+    "balanced_accuracy": 0.6072196422428621,
+    "f1_macro": 0.5504774007910564,
+    "precision_macro": 0.5343602435916532,
+    "recall_macro": 0.6072196422428621,
+    "roc_auc_ovr_weighted": 0.7464418619230899,
+    "fold_scores": {
+      "fit_time": [
+        0.17715072631835938,
+        0.1987473964691162,
+        0.17449593544006348,
+        0.17547917366027832,
+        0.18023967742919922
+      ],
+      "score_time": [
+        0.05281352996826172,
+        0.06652975082397461,
+        0.06598758697509766,
+        0.052268266677856445,
+        0.055162906646728516
+      ],
+      "balanced_accuracy": [
+        0.533625730994152,
+        0.6516683866529068,
+        0.5730263157894737,
+        0.5833333333333334,
+        0.6944444444444445
+      ],
+      "f1_macro": [
+        0.5090569561157796,
+        0.5643463736617563,
+        0.5098459845984599,
+        0.5568807339449542,
+        0.6122569556343324
+      ],
+      "precision_macro": [
+        0.5011363636363636,
+        0.5378787878787878,
+        0.4921717171717172,
+        0.5419287211740041,
+        0.5986856280973928
+      ],
+      "recall_macro": [
+        0.533625730994152,
+        0.6516683866529068,
+        0.5730263157894737,
+        0.5833333333333334,
+        0.6944444444444445
+      ],
+      "roc_auc_ovr_weighted": [
+        0.7908927767606457,
+        0.7609985723501443,
+        0.7737758019463721,
+        0.6470823829694797,
+        0.759459775588808
+      ]
+    }
+  },
+  "test_metrics": {
+    "balanced_accuracy": 0.5298457411133467,
+    "f1_macro": 0.503149138443256,
+    "precision_macro": 0.4924863387978142,
+    "recall_macro": 0.5298457411133467,
+    "roc_auc_ovr_weighted": 0.7524424046163177,
+    "pr_auc_ovr_weighted": 0.7321842810515965
+  },
+  "n_top_genes": 100
+}
