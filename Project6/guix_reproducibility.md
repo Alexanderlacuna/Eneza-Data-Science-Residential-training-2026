@@ -44,12 +44,53 @@ source-level provenance, or when you are working on an HPC cluster.
 
    Outputs will be written to `output/`.
 
+   If you prefer a finer-grained mount (read-only data and scripts, writable
+   output only), use:
+
+   ```bash
+   guix time-machine -C channels.scm -- shell --container --network \
+     --manifest=manifest.scm \
+     --expose=./data \
+     --share=./output \
+     --expose=./scripts \
+     --symlink=/usr/bin/env=bin/env \
+     --preserve='^TERM$' \
+     -- python scripts/run.py
+   ```
+
+   Both forms require the `output/` directory to be writable by the user
+   running Guix.
+
 ## Note on package versions
 
 Guix package versions may differ from the versions pinned in `requirements.lock`
 for Docker. For strict bit-for-bit reproducibility, use the Docker image. Use
 Guix when you need source-level provenance, cluster compatibility, or cannot use
 Docker.
+
+## Troubleshooting
+
+### `PermissionError: [Errno 13] Permission denied: 'output/figures/...'`
+
+This usually happens when `output/` was created by the Docker container, which
+runs as root by default. The files are then owned by root and the Guix container
+(running under your normal user ID) cannot overwrite them.
+
+Fix it by changing the ownership of the output directory to your user:
+
+```bash
+sudo chown -R "$USER:$USER" output/
+```
+
+Or delete the Docker-generated output and let Guix create a fresh one:
+
+```bash
+rm -rf output/
+guix shell --container --network \
+  --manifest=manifest.scm \
+  --share=. \
+  -- python scripts/run.py
+```
 
 ## More information
 
