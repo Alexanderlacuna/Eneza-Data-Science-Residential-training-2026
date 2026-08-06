@@ -40,7 +40,8 @@ Outputs are written to `output/`.
 ### Using Guix 
 
 see guix official docs:
-`https://guix.gnu.org/`
+https://guix.gnu.org/
+
 see reproducibility with guix 
 **[guix_reproducibility.md](guix_reproducibility.md)**.
 
