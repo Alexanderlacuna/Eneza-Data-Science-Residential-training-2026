@@ -1,0 +1,69 @@
+{
+  "format_version": "1.0",
+  "files": [
+    {
+      "original_path": "data/GSE82208_series_matrix.txt",
+      "compressed_path": "data/GSE82208_series_matrix.txt.gz",
+      "original_sha256": "e37d53bd50286930577b745232d4618b9abe1b465e287a9495faa8a21b5a424b",
+      "compressed_sha256": "5863c099db9394ee31f6a9e1cda9e5cddac74d12f340fb4bae42b88c05c03c78",
+      "compression": "gzip",
+      "mtime_in_header": 0
+    },
+    {
+      "original_path": "data/TCGA.THCA.sampleMap_HiSeqV2",
+      "compressed_path": "data/TCGA.THCA.sampleMap_HiSeqV2.gz",
+      "original_sha256": "63155d00e7b84210c026c218b7ae938a5e6f515d9e9e6ef6c65ebd72840fb6e0",
+      "compressed_sha256": "b050cf089676612ce53d1ac6c1df732c318e88a62c7ec46af320df4493bbe363",
+      "compression": "gzip",
+      "mtime_in_header": 0
+    },
+    {
+      "original_path": "data/data_clinical_patient.txt",
+      "compressed_path": "data/data_clinical_patient.txt.gz",
+      "original_sha256": "a10881fd6e0e87ad0dd1aa3215fa957a6589b6c05a9e4ee21b8f204f29407b5c",
+      "compressed_sha256": "542296047ddcc8422db0ac6a952d7a6855e2093f4c64bfac64a8677dae9f27b4",
+      "compression": "gzip",
+      "mtime_in_header": 0
+    },
+    {
+      "original_path": "data/data_clinical_sample.txt",
+      "compressed_path": "data/data_clinical_sample.txt.gz",
+      "original_sha256": "10fd8a0f4a0272c479007ea1869383ccab474d0c011d64d6ae935b0884712727",
+      "compressed_sha256": "f52f13846731e20fc764cf28204f437fbd9370a71ea6b976bb5165e8cc5f7c54",
+      "compression": "gzip",
+      "mtime_in_header": 0
+    },
+    {
+      "original_path": "data/data_mrna_seq_v2_rsem.txt",
+      "compressed_path": "data/data_mrna_seq_v2_rsem.txt.gz",
+      "original_sha256": "80dbc7aaa0a2d9a671b7b7648b00a4ff2a40ae4a821aec52c8dfa2543dda0733",
+      "compressed_sha256": "b07080a2d48cd39696a634d060cd1d2860fb4241c92b91685dc718a550aa3963",
+      "compression": "gzip",
+      "mtime_in_header": 0
+    },
+    {
+      "original_path": "data/deseq_data/Thyroid_sigDE_Follicular_vs_Classical.csv",
+      "compressed_path": "data/deseq_data/Thyroid_sigDE_Follicular_vs_Classical.csv.gz",
+      "original_sha256": "3e0d04bcaa83a6c4a464d5b5b1a7dd91bc354c67b1dd3747189da86906e8ce3f",
+      "compressed_sha256": "d71eca04ee961919ed150c6e66dea5bbac1af59ce050e41d6bcd6ec9c80f2ff7",
+      "compression": "gzip",
+      "mtime_in_header": 0
+    },
+    {
+      "original_path": "data/deseq_data/Thyroid_sigDE_TallCell_vs_Classical.csv",
+      "compressed_path": "data/deseq_data/Thyroid_sigDE_TallCell_vs_Classical.csv.gz",
+      "original_sha256": "150baaaa78d42cb562eb7a3169b4451d3ae7d62cf0bbf18280e32dc47d6f920b",
+      "compressed_sha256": "0adb44e14cca297c34ef005b4eafa6ce6306ea430bb93b76821425acb0180b56",
+      "compression": "gzip",
+      "mtime_in_header": 0
+    },
+    {
+      "original_path": "data/deseq_data/Thyroid_sigDE_TallCell_vs_Follicular.csv",
+      "compressed_path": "data/deseq_data/Thyroid_sigDE_TallCell_vs_Follicular.csv.gz",
+      "original_sha256": "29cd6c3a740d2215015e50d2456c1443ee50c2942ee59744fd516fe2d376727d",
+      "compressed_sha256": "f05f9cbd00521f553ba271f9aad7de8865d0fee5af38483763c7fb5332b776eb",
+      "compression": "gzip",
+      "mtime_in_header": 0
+    }
+  ]
+}
