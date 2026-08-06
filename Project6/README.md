@@ -36,9 +36,19 @@ docker compose up --build
 
 Outputs are written to `output/`.
 
-####  check reproducibility docs:
 
-`./REPRODUCIBILITY.md`
+### Using Guix 
+
+see guix official docs:
+`https://guix.gnu.org/`
+see reproducibility with guix 
+**[guix_reproducibility.md](guix_reproducibility.md)**.
+
+```bash 
+
+ guix time-machine -C channels.scm -- shell --container --network   --manifest=manifest.scm   --expose=./data   --share=./output   --expose=./scripts   --symlink=/usr/bin/env=bin/env   --preserve='^TERM\$'   -- python scripts/run.py
+
+```
 
 ### Local Python
 
@@ -47,9 +57,12 @@ pip install -r requirements.txt
 python scripts/run.py
 ```
 
-Runtime: ~3–5 minutes on a laptop with 4 cores. See `REPRODUCIBILITY.md` for
-Docker details and CI examples.
 
+####  Check reproducibility docs:
+
+[REPRODUCIBILITY.md](REPRODUCIBILITY.md)
+
+**[REPRODUCIBILITY.md](REPRODUCIBILITY.md)**.
 ## Project structure
 
 ```text
@@ -113,7 +126,7 @@ histologically and molecularly similar. The model is best used as a triage
 prototype to flag samples for further review.
 
 Full results, feature-selector/classifier comparisons, and survival analysis
-are in `docs/PROJECT_REPORT.md` and `docs/anova_vs_deseq.org`.
+are in [`docs/anova_vs_deseq.org`](docs/anova_vs_deseq.org).
 
 ## Outputs
 
@@ -142,5 +155,5 @@ To change the model or feature count, edit the `Config` object in
 ## Citation and data provenance
 
 - TCGA data: The Cancer Genome Atlas (TCGA) Thyroid Carcinoma (THCA) cohort.
-- Design decisions: `docs/architecture_design.org`.
+- Design decisions: [`docs/architecture_design.org`](docs/architecture_design.org).
 

@@ -1,15 +1,7 @@
-# Eneza group 6 — Reproducibility & Docker Deployment Guide
+# Eneza — Reproducibility & Deployment Guide
 
-This guide explains how to run the Eneza Project 6  pipeline inside Docker so that the
-analysis is fully reproducible across machines, operating systems, and time.
-
-If you prefer using guix we have a section for you [./guix_reproducilibity.md]
-
----
-
-
-
-## Why we chose Docker?
+This guide describes the two reproducible execution contexts supported for the
+Eneza thyroid-cancer subtype pipeline.
 
 Reproducibility has three layers:
 
@@ -17,15 +9,23 @@ Reproducibility has three layers:
    single entry point (`scripts/run.py`).
 2. **Pinned software environment** — exact Python interpreter and package
    versions.
-3. **Fixed input data** — the same TCGA files mounted into the container.
+3. **Fixed input data** — the same TCGA files mounted into the runtime.
 
-Docker addresses layer 2 by bundling the Python version and all dependencies
-into an image.  Docker Compose addresses layers 1 and 3 by mounting the project
-folder and running the same command every time.
+## Supported contexts
+
+| Context | Best for | How it pins the environment |
+|---------|----------|----------------------------|
+| **Docker** (default) | Laptops, shared servers, CI/CD, reviewers who just want a single command. | `Dockerfile` + `requirements.lock` bundle Python 3.11 and all dependencies into an image. |
+| **Guix** (alternative) | Academic clusters, HPC, environments where Docker is unavailable or where source-level provenance is required. | `channels.scm` + `manifest.scm` describe the full package dependency graph and build recipes. |
 
 ---
 
-## Files added for reproducibility
+## Docker (default)
+
+Docker is the primary reproducibility context. It is the easiest way to share
+an identical environment across different machines.
+
+### Files added for Docker
 
 | File | Purpose |
 |------|---------|
@@ -34,30 +34,23 @@ folder and running the same command every time.
 | `requirements.lock` | Exact versions of the direct Python dependencies |
 | `.dockerignore` | Keeps large data files and outputs out of the image |
 | `Makefile` | Short commands: `make build`, `make run`, `make shell`, `make freeze` |
-| `docs/architecture_design.org` | Why we made  architectural decision  |
 
----
-
-## Prerequisites
+### Prerequisites
 
 - [Docker Engine](https://docs.docker.com/engine/install/) 24.0+ (or Docker Desktop)
 - [Docker Compose](https://docs.docker.com/compose/install/) v2+
-- The Eneza repository cloned locally, **including the raw TCGA data files**
-  you can fetch the file from 
-  https://github.com/cBioPortal/datahub/tree/master/public/thca_tcga_pan_can_atlas_2018
-  
+- The raw TCGA data files in `data/`:
   - `data/data_mrna_seq_v2_rsem.txt`
   - `data/data_clinical_sample.txt`
   - `data/data_clinical_patient.txt`
 
----
+You can fetch the TCGA THCA Pan-Cancer Atlas files from the
+[cBioPortal datahub](https://github.com/cBioPortal/datahub/tree/master/public/thca_tcga_pan_can_atlas_2018).
 
-## Quick start
-
-The fastest way to reproduce the full pipeline is with Docker Compose:
+### Quick start with Docker Compose
 
 ```bash
-# From the repository root navigate to  i.e ./project6
+# From the repository root
 docker compose up --build
 ```
 
@@ -68,48 +61,92 @@ What happens:
 3. The container runs `python scripts/run.py`.
 4. All outputs are written back to the host in `./output/`.
 
---- 
+Expected runtime: **3–5 minutes** on a modern laptop.
 
-## Manual Docker commands
-
-If you prefer plain Docker instead of Compose:
+### Manual Docker commands
 
 ```bash
-# 1. Build the image
+# Build the image
 docker build -t eneza .
 
-# 2. Run the pipeline (mounts current directory into /app)
+# Run the pipeline
 docker run --rm -v "$(pwd)":/app eneza
 
-# 3. Inspect the outputs
+# Inspect outputs
 ls output/tables
 ls output/figures
 ls output/gene_lists
 ```
 
----
-
-## Interactive exploration
-
-To drop into a shell inside the same reproducible environment:
+### Interactive shell
 
 ```bash
-# With Docker Compose
 docker compose run --rm eneza bash
+```
 
-# With plain Docker
+or
+
+```bash
 docker run --rm -it -v "$(pwd)":/app --entrypoint /bin/bash eneza
 ```
 
-Inside the container you can run Python, inspect data, or re-run the pipeline
-with a modified configuration.
+### Pinning dependencies even harder
+
+`requirements.lock` pins the direct dependencies. To create a fully transitive
+lock file, run:
+
+```bash
+make freeze
+```
+
+This produces `requirements-freeze.txt`, which you can use in place of
+`requirements.lock` for maximum reproducibility.
+
+### Changing the configuration
+
+`scripts/run.py` defines an immutable `Config` dataclass at the top of the file.
+To run a custom configuration, create a wrapper script and mount it into the
+container:
+
+```python
+# custom_run.py
+from scripts.run import Config, run_workflow
+
+cfg = Config(
+    classifier="random_forest",
+    selector="kbest",
+    selected_features=250,
+    cv_splits=5,
+    random_state=42,
+    output_dir="./output_random_forest",
+)
+run_workflow(cfg)
+```
+
+```bash
+docker run --rm -v "$(pwd)":/app eneza python custom_run.py
+```
+
+---
+
+## Guix (alternative)
+
+For environments where Docker is unavailable or undesirable, the project can
+also be run reproducibly with **Guix**, a functional package manager. Guix gives
+source-level provenance, declarative manifests, and containerised execution
+without root privileges.
+
+See the full guide: **[guix_reproducibility.md](guix_reproducibility.md)**.
+
+In short: **Docker is the easiest portable default; Guix is the strongest
+provenance-and-auditability alternative**, especially for HPC and shared
+clusters.
 
 ---
 
 ## What gets produced
 
-After a successful run the following artefacts are written to `output/` on the
-host (the container writes through the volume mount):
+After a successful run the following artefacts are written to `output/`:
 
 ```text
 output/
@@ -137,74 +174,35 @@ scores, so every output directory is self-documenting.
 
 ---
 
-## Pinning dependencies even harder
-
-`requirements.lock` pins the **direct** dependencies that we install
-explicitly (numpy, pandas, scikit-learn, matplotlib, seaborn, lifelines).
-When pip installs them it also resolves transitive dependencies
-(joblib, scipy, contourpy, etc.).
-
-If you need a fully transitive lock file, run:
-
-```bash
-make freeze
-```
-
-This creates `requirements-freeze.txt` with every single package version that
-is actually installed in the container.  You can then use it in the Dockerfile
-instead of `requirements.lock` for maximum reproducibility.
-
----
-
-## Changing the configuration
-
-`scripts/run.py` defines a `Config` dataclass at the top of the script.  To run with
-a different model or feature count, create a small wrapper script and mount it
-into the container:
-
-```python
-# custom_run.py
-from scripts.run import Config, run_workflow
-
-cfg = Config(
-    classifier="random_forest",
-    selector="kbest",
-    selected_features=250,
-    cv_splits=5,
-    random_state=42,
-    output_dir="./output_random_forest",
-)
-run_workflow(cfg)
-```
-
-Run it with:
-
-```bash
-docker run --rm -v "$(pwd)":/app eneza python custom_run.py
-```
-
-Because `random_state=42` is fixed, the same config will produce identical
-results every time.
-
-
 ## Troubleshooting
 
 ### `FileNotFoundError` for data files
 
-The TCGA data files must be present in the `data/` directory before the
-container starts.  They are not included in the Docker image.  Check that
-`data/data_mrna_seq_v2_rsem.txt`, `data/data_clinical_sample.txt`, and
-`data/data_clinical_patient.txt` exist.
+The TCGA data files must be present in `data/` before the container or Guix
+environment starts. Check that the following files exist:
 
-you can fetch them from the TCGA repository:
-https://github.com/cBioPortal/datahub/tree/master/public/thca_tcga_pan_can_atlas_2018
+- `data/data_mrna_seq_v2_rsem.txt`
+- `data/data_clinical_sample.txt`
+- `data/data_clinical_patient.txt`
+
+You can download them from the [cBioPortal datahub](https://github.com/cBioPortal/datahub/tree/master/public/thca_tcga_pan_can_atlas_2018).
 
 ### Permission errors on output files
 
-By default the container runs as root, so files in `output/` are owned by root.
-On Linux you can change ownership afterwards:
+By default the Docker container runs as root, so `output/` files may be owned
+by root. On Linux you can fix this with:
 
 ```bash
 sudo chown -R "$USER:$USER" output/
 ```
 
+Guix containers do not have this issue because they run under your own UID.
+
+---
+
+## Summary
+
+- Run with Docker: `docker compose up --build`.
+- Run with Guix: see [`guix_reproducibility.md`](guix_reproducibility.md).
+- Either context produces identical outputs from the same `data/` files and the
+  same `scripts/run.py` entry point.
