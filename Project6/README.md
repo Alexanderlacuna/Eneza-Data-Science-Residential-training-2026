@@ -8,9 +8,12 @@ This is a research prototype for molecular triage, not a clinical diagnostic
 device.
 
 
-## TLDR 
+##  TL;DR
 
+```bash
 docker compose up --build
+
+```
 
 What happens:
 
